@@ -13,4 +13,14 @@ public class MainItemsController {
 		main.showSearchBookScene();
 	}
 	
+	@FXML
+	private void goBorrowBook() throws IOException {
+		main.showBorrowBookScene();
+	}
+	
+	@FXML
+	private void goReturnedBook() throws IOException {
+		main.showReturnedBookScene();
+	}
+	
 }

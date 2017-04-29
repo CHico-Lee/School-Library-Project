@@ -46,6 +46,21 @@ public class Main extends Application {
 		mainLayout.setCenter(searchBook);
 	}
 	
+	public static void showBorrowBookScene() throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(Main.class.getResource("borrowBook/BorrowBook.fxml"));
+		BorderPane borrowBook = loader.load();
+		mainLayout.setCenter(borrowBook);
+	}
+	
+	public static void showReturnedBookScene() throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(Main.class.getResource("returnedBook/returnedBook.fxml"));
+		BorderPane returnedBook = loader.load();
+		mainLayout.setCenter(returnedBook);
+	}
+	
+	
 	public static void main(String[] args) {
 		launch(args);
 	}

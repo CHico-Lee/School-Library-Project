@@ -10,8 +10,8 @@
       <FlowPane hgap="20.0" prefHeight="200.0" prefWidth="200.0" vgap="20.0" BorderPane.alignment="CENTER">
          <children>
             <Button mnemonicParsing="false" onAction="#goSearchBook" prefHeight="120.0" prefWidth="120.0" text="Search Book" />
-            <Button mnemonicParsing="false" prefHeight="120.0" prefWidth="120.0" text="Borrow Book" />
-            <Button mnemonicParsing="false" prefHeight="120.0" prefWidth="120.0" text="Return Book" />
+            <Button mnemonicParsing="false" onAction="#goBorrowBook" prefHeight="120.0" prefWidth="120.0" text="Borrow Book" />
+            <Button mnemonicParsing="false" onAction="#goReturnedBook" prefHeight="120.0" prefWidth="120.0" text="Return Book" />
          </children>
          <padding>
             <Insets left="20.0" top="20.0" />
