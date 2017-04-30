@@ -53,11 +53,11 @@ public class Main extends Application {
 		mainLayout.setCenter(borrowBook);
 	}
 	
-	public static void showReturnedBookScene() throws IOException {
+	public static void showReturnBookScene() throws IOException {
 		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(Main.class.getResource("returnedBook/returnedBook.fxml"));
-		BorderPane returnedBook = loader.load();
-		mainLayout.setCenter(returnedBook);
+		loader.setLocation(Main.class.getResource("returnBook/ReturnBook.fxml"));
+		BorderPane returnBook = loader.load();
+		mainLayout.setCenter(returnBook);
 	}
 	
 	

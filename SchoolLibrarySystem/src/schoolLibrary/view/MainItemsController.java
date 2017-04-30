@@ -19,8 +19,8 @@ public class MainItemsController {
 	}
 	
 	@FXML
-	private void goReturnedBook() throws IOException {
-		main.showReturnedBookScene();
+	private void goReturnBook() throws IOException {
+		main.showReturnBookScene();
 	}
 	
 }

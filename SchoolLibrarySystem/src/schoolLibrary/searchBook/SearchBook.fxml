@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -20,20 +21,26 @@
       </Label>
    </top>
    <center>
-      <VBox spacing="20.0" BorderPane.alignment="CENTER">
+      <VBox alignment="TOP_CENTER" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
             <HBox spacing="20.0">
                <children>
-                  <TextField fx:id="query" prefWidth="400.0" promptText="Enter an book titile or author" />
-                  <Button mnemonicParsing="false" text="Search" />
+                  <TextField fx:id="query" prefHeight="25.0" prefWidth="411.0" promptText="Enter ISBN, book titile or author" />
+                  <ComboBox fx:id="categoryComBox" prefWidth="150.0" />
                </children>
             </HBox>
             <TableView fx:id="table" prefHeight="314.0" prefWidth="600.0">
               <columns>
-                <TableColumn fx:id="title" prefWidth="75.0" text="Title" />
-                <TableColumn fx:id="author" prefWidth="75.0" text="Author" />
+                  <TableColumn fx:id="isbn" prefWidth="100.0" text="ISBN" />
+                <TableColumn fx:id="title" prefWidth="200.0" text="Title" />
+                <TableColumn fx:id="author" prefWidth="150.0" text="Author" />
               </columns>
             </TableView>
+            <Button mnemonicParsing="false" text="Get Selected Book">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
          </children>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
