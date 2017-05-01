@@ -1,5 +1,6 @@
 package schoolLibrary.bookDetails;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,6 +18,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert.AlertType;
 import schoolLibrary.Main;
+import schoolLibrary.borrowBook.BorrowBookController;
 import schoolLibrary.searchBook.Row;
 
 public class BookDetailsController {
@@ -69,7 +71,7 @@ public class BookDetailsController {
 	        // generate parameterized sql
  			String sql = "SELECT Book.ISBN AS book_isbn, Book.Title AS book_title, Book.Author AS book_author," + 
  							" Book.Publisher AS book_pub, Book.Year AS book_year, Book.Description AS book_des," + 
- 							" Book.CategoryId AS book_cat" +
+ 							" (Book.CategoryId || ' - ' || CATEGORY.CategoryName) AS book_cat" +
  							" FROM BOOK" + 
  							" JOIN CATEGORY USING (CategoryId)" +
  							" WHERE Book.ISBN = ?;";
@@ -101,6 +103,21 @@ public class BookDetailsController {
 			alert.setOnCloseRequest(event -> Platform.exit());
 			// show the alert
 			alert.show();
+		}
+		
+		@FXML
+		private void clickSelect() throws IOException {
+			try {
+			BorrowBookController.setIsbn(selectedIsbn);
+			main.showBorrowBookScene();
+			}
+			catch (NullPointerException e) {
+				// Alert the user when things go terribly wrong
+				Alert alert = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.CLOSE);
+				alert.setHeaderText("Please select a book.");
+				// show the alert
+				alert.show();
+			}
 		}
 
 }
