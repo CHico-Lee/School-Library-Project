@@ -43,6 +43,7 @@ public class BookDetailsController {
 	
 	private Main main;
 	
+	
 	private static String selectedIsbn = null;
 	
 	public static void setIsbn(String isbn) {
