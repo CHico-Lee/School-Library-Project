@@ -183,29 +183,32 @@ private Connection connection;
 			// get results
 			ResultSet resstmtAvailable = stmtAvailable.executeQuery();
 			
-			if (resstmtAvailable.getString("notAvailable").equals("1") ) {
+			if (!validMemId ||!validIsbn){
 				// Alert the user when things go terribly wrong
-				Alert alert = new Alert(AlertType.ERROR, "Book is not available to borrow.", ButtonType.CLOSE);
+				Alert alert = new Alert(AlertType.ERROR, "Please make sure the Member Id and ISBN is correct", ButtonType.CLOSE);
+				alert.setHeaderText("Incorrect Member ID or ISBN.");
 				// show the alert
 				alert.show();
 				return;
 			}
-			else if (!validMemId ||!validIsbn){
+			else if (resstmtAvailable.getString("notAvailable").equals("1") ) {
 				// Alert the user when things go terribly wrong
-				Alert alert = new Alert(AlertType.ERROR, "Incorrect Member ID or ISBN.", ButtonType.CLOSE);
+				Alert alert = new Alert(AlertType.ERROR, "Please look for another book.", ButtonType.CLOSE);
+				alert.setHeaderText("This book is currently unavailable to borrow.");
 				// show the alert
 				alert.show();
 				return;
 			}
+			
 			
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date currDate = new Date();
-	        Date dueDate = new Date(System.currentTimeMillis() + (7 * DAY_IN_MS));
-			
+	        Date dueDate = new Date(System.currentTimeMillis() + (7 * DAY_IN_MS));	     		
+	        
 			// generate parameterized sql
 			String sql = "INSERT INTO Borrow (ISBN, MemberId, BorrowDate, DueDate, ReturnedDate, Rating)" +
 							" VALUES" +
-							" (?, ?, "+ dateFormat.format(currDate) + "," + dateFormat.format(dueDate) +", NULL, NULL);";
+							" (?, ?, '" + dateFormat.format(currDate) + "','" + dateFormat.format(dueDate) +"', NULL, NULL);";
 	
 			// prepared statement
 			PreparedStatement stmt = connection.prepareStatement( sql );
@@ -214,10 +217,23 @@ private Connection connection;
 			stmt.setString( 2, paramMemId.trim().replaceAll("[^\\d]", ""));
 			
 			// get results
-			ResultSet res = stmt.executeQuery();
+			int res = stmt.executeUpdate();
+			
+			String borrowMsgHeader;
+			String borrowMessage;	
+			if (res == 1) {
+				borrowMsgHeader = "Thank You for borrowing!";
+				borrowMessage = "Please return the book by " + dateFormat.format(dueDate) + ".";
+			}
+			else {
+				borrowMsgHeader = "There is an Error!";
+				borrowMessage = "Please ask an librarian for help.";
+			}
+				
 			
 			// Show confirm message.
-			Alert alert = new Alert(AlertType.INFORMATION, res.toString(), ButtonType.CLOSE);
+			Alert alert = new Alert(AlertType.INFORMATION, borrowMessage, ButtonType.CLOSE);
+			alert.setHeaderText(borrowMsgHeader);
 			// show the alert
 			alert.show();
 		
