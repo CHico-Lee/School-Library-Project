@@ -1,5 +1,6 @@
 package schoolLibrary.searchBook;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,6 +11,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -17,6 +19,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
+import schoolLibrary.Main;
+import schoolLibrary.borrowBook.BorrowBookController;
+import javafx.scene.control.Button;
 
 
 public class SearchBookController {
@@ -40,9 +45,12 @@ public class SearchBookController {
 	@FXML
 	private TableColumn<Row,String> author;
 
-	
 	// The list of rows to put into the table
 	private ObservableList<Row> data;
+	
+	private Button selectBtn;
+	
+	private Main main;
 	
 	/**
      * Initializes the controller class. 
@@ -128,7 +136,7 @@ public class SearchBookController {
 				sql = "SELECT Book.ISBN AS book_isbn, Book.Title AS book_title, Book.Author AS book_author" +
 						" FROM Book" +
 						" JOIN Category USING (CategoryId)" +
-						" WHere Category.CategoryName Like '%" + categoryComBox.getValue() + "%'" +
+						" WHere Category.CategoryName Like ?" +
 						" ORDER BY book_isbn";
 			}
 			else if (categoryComBox.getValue().equals("All Categories"))
@@ -143,25 +151,32 @@ public class SearchBookController {
 				sql = "SELECT Book.ISBN AS book_isbn, Book.Title AS book_title, Book.Author AS book_author" +
 						" FROM Book" +
 						" JOIN Category USING (CategoryId)" +
-						" WHERE (Book.ISBN LIKE ? or Book.Title LIKE ? or Book.Author LIKE ?) and Category.CategoryName Like '%" + 
-						categoryComBox.getValue() + "%'" +
+						" WHERE (Book.ISBN LIKE ? or Book.Title LIKE ? or Book.Author LIKE ?) and Category.CategoryName Like ?" + 
 						" ORDER BY book_isbn";
 			}
-			
 			
 			// prepared statement
 			PreparedStatement stmt = connection.prepareStatement( sql );
 			
-			
 			// bind parameter(s)
 			// In SQLite "?" is a place holder (act like variable)
 			// 1 is the first place holder, 2 is the second place holder, etc
-			if ( !param.trim().equals("") ) {
+			if ( !param.trim().equals("") && categoryComBox.getValue().equals("All Categories")) {
 				// the % before and after the parameter searches anywhere in the database column
 				stmt.setString( 1, "%" + param.trim() + "%" );
 				stmt.setString( 2, "%" + param.trim() + "%" );
 				stmt.setString( 3, "%" + param.trim() + "%" );
 			}
+			else if (!param.trim().equals("")) {
+				stmt.setString( 1, "%" + param.trim() + "%" );
+				stmt.setString( 2, "%" + param.trim() + "%" );
+				stmt.setString( 3, "%" + param.trim() + "%" );
+				stmt.setString( 4, "%" + categoryComBox.getValue() + "%" );
+			}
+			else if (!categoryComBox.getValue().equals("All Categories")) {
+				stmt.setString( 1, "%" + categoryComBox.getValue() + "%" );
+			}
+				
 
 			// get results
 			ResultSet res = stmt.executeQuery();
@@ -186,6 +201,13 @@ public class SearchBookController {
 		alert.setOnCloseRequest(event -> Platform.exit());
 		// show the alert
 		alert.show();
+	}
+	
+	@FXML
+	private void clickSelect() throws IOException {
+		Row selectedRow = table.getSelectionModel().getSelectedItem();
+		BorrowBookController.setIsbn(selectedRow.getIsbn().getValue());
+		main.showBorrowBookScene();
 	}
 	
 }

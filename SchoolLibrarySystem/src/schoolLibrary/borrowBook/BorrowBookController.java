@@ -39,6 +39,15 @@ private Connection connection;
 
 	private static long DAY_IN_MS = 1000 * 60 * 60 * 24;
 	
+	private boolean validMemId;
+	private boolean validIsbn;
+	
+	private static String selectedIsbn = null;
+	
+	public static void setIsbn(String isbn) {
+		selectedIsbn = isbn;
+	}
+	
 	/**
      * Initializes the controller class. 
      * This method is automatically called after the fxml file has been loaded.
@@ -67,11 +76,14 @@ private Connection connection;
 		} catch (SQLException e) {
 			handleError(e);
 		}
-
+        
         // update initially shows everything, like in iTunes
         updateName();
-        updateBook();
-        
+        if (selectedIsbn == null)
+        	updateBook();
+        else
+        	isbnTxtfield.setText(selectedIsbn);
+        	
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         Date date = new Date(System.currentTimeMillis() + (7 * DAY_IN_MS));
         dueDateLbl.setText(dateFormat.format(date));
@@ -85,6 +97,7 @@ private Connection connection;
 		try {
 			// The parameter comes from the query TextField
 			// at first, it is empty
+			validMemId = false;
 			nameLbl.setText("");
 			String param = memberIdTxtfield.getText();
 						
@@ -112,6 +125,7 @@ private Connection connection;
 				memberInfo += res.getString("fName") + " " + res.getString("lName");
 				
 				nameLbl.setText(memberInfo);
+		        validMemId = true;
 			}
 
 		} catch (SQLException e) {
@@ -124,6 +138,7 @@ private Connection connection;
 		try {
 			// The parameter comes from the query TextField
 			// at first, it is empty
+	        validIsbn = false;
 			bookLbl.setText("");
 			String param = isbnTxtfield.getText();
 						
@@ -141,6 +156,7 @@ private Connection connection;
 			ResultSet res = stmt.executeQuery();
 			if ( res.next() ) {
 				bookLbl.setText(res.getString("book_title") + " by " + res.getString("book_author"));
+				validIsbn = true;
 			}
 
 		} catch (SQLException e) {
@@ -154,6 +170,33 @@ private Connection connection;
 			
 			String paramMemId = memberIdTxtfield.getText();
 			String paramIsbn = isbnTxtfield.getText();
+			
+			// generate parameterized sql
+			String sqlAvailable = "SELECT COUNT(*) AS notAvailable FROM Borrow" +
+									" WHERE Borrow.ISBN = ? AND Borrow.ReturnedDate IS NULL;";
+				
+			// prepared statement
+			PreparedStatement stmtAvailable = connection.prepareStatement( sqlAvailable );
+						
+			stmtAvailable.setString( 1, paramIsbn.trim().replaceAll("[^\\d]", ""));
+						
+			// get results
+			ResultSet resstmtAvailable = stmtAvailable.executeQuery();
+			
+			if (resstmtAvailable.getString("notAvailable").equals("1") ) {
+				// Alert the user when things go terribly wrong
+				Alert alert = new Alert(AlertType.ERROR, "Book is not available to borrow.", ButtonType.CLOSE);
+				// show the alert
+				alert.show();
+				return;
+			}
+			else if (!validMemId ||!validIsbn){
+				// Alert the user when things go terribly wrong
+				Alert alert = new Alert(AlertType.ERROR, "Incorrect Member ID or ISBN.", ButtonType.CLOSE);
+				// show the alert
+				alert.show();
+				return;
+			}
 			
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date currDate = new Date();
@@ -173,6 +216,10 @@ private Connection connection;
 			// get results
 			ResultSet res = stmt.executeQuery();
 			
+			// Show confirm message.
+			Alert alert = new Alert(AlertType.INFORMATION, res.toString(), ButtonType.CLOSE);
+			// show the alert
+			alert.show();
 		
 		} catch (SQLException e) {
 			handleError(e);

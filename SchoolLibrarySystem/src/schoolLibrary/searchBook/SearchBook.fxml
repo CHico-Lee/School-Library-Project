@@ -32,11 +32,11 @@
             <TableView fx:id="table" prefHeight="314.0" prefWidth="600.0">
               <columns>
                   <TableColumn fx:id="isbn" prefWidth="100.0" text="ISBN" />
-                <TableColumn fx:id="title" prefWidth="200.0" text="Title" />
-                <TableColumn fx:id="author" prefWidth="150.0" text="Author" />
+                <TableColumn fx:id="title" prefWidth="258.66668701171875" text="Title" />
+                <TableColumn fx:id="author" prefWidth="176.0" text="Author" />
               </columns>
             </TableView>
-            <Button mnemonicParsing="false" text="Get Selected Book">
+            <Button fx:id="selectBtn" mnemonicParsing="false" onAction="#clickSelect" text="Get Selected Book">
                <font>
                   <Font size="14.0" />
                </font>
