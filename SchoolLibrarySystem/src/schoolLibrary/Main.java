@@ -60,6 +60,13 @@ public class Main extends Application {
 		mainLayout.setCenter(returnBook);
 	}
 	
+	public static void showBookDetailsScene() throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(Main.class.getResource("bookDetails/BookDetails.fxml"));
+		BorderPane bookDetails = loader.load();
+		mainLayout.setCenter(bookDetails);
+	}
+	
 	
 	public static void main(String[] args) {
 		launch(args);

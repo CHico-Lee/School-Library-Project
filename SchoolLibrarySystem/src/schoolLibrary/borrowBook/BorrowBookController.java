@@ -171,6 +171,8 @@ private Connection connection;
 			String paramMemId = memberIdTxtfield.getText();
 			String paramIsbn = isbnTxtfield.getText();
 			
+			// Code below is for check book availability
+			
 			// generate parameterized sql
 			String sqlAvailable = "SELECT COUNT(*) AS notAvailable FROM Borrow" +
 									" WHERE Borrow.ISBN = ? AND Borrow.ReturnedDate IS NULL;";
@@ -200,6 +202,7 @@ private Connection connection;
 				return;
 			}
 			
+			// Code below is for borrowing book.
 			
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date currDate = new Date();

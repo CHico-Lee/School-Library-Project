@@ -11,7 +11,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -20,6 +19,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import schoolLibrary.Main;
+import schoolLibrary.bookDetails.BookDetailsController;
 import schoolLibrary.borrowBook.BorrowBookController;
 import javafx.scene.control.Button;
 
@@ -33,6 +33,7 @@ public class SearchBookController {
 	
 	@FXML
 	private ComboBox<String> categoryComBox;
+	
 	@FXML
 	private TableView<Row> table;
 
@@ -96,10 +97,13 @@ public class SearchBookController {
         PreparedStatement stmt = connection.prepareStatement( listCatSql );
         // get results
 		ResultSet res = stmt.executeQuery();
+
 		while ( res.next() ) {
 			categoryComBox.getItems().addAll(
 					res.getString("catName"));
 		}
+		
+
 		categoryComBox.setValue("All Categories");
 		
         // update initially shows everything, like in iTunes
@@ -194,6 +198,7 @@ public class SearchBookController {
 		}
 
 	}
+	
 	private void handleError(Exception e) {
 		// Alert the user when things go terribly wrong
 		Alert alert = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.CLOSE);
@@ -205,9 +210,18 @@ public class SearchBookController {
 	
 	@FXML
 	private void clickSelect() throws IOException {
-		Row selectedRow = table.getSelectionModel().getSelectedItem();
-		BorrowBookController.setIsbn(selectedRow.getIsbn().getValue());
-		main.showBorrowBookScene();
+		try {
+		Row selectedRow = table.getSelectionModel().getSelectedItem();		
+		BookDetailsController.setIsbn(selectedRow.getIsbn().getValue());
+		main.showBookDetailsScene();
+		}
+		catch (NullPointerException e) {
+			// Alert the user when things go terribly wrong
+			Alert alert = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.CLOSE);
+			alert.setHeaderText("Please select a book.");
+			// show the alert
+			alert.show();
+		}
 	}
 	
 }
