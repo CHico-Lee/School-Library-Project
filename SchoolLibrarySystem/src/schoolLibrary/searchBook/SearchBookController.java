@@ -1,3 +1,11 @@
+/**
+* COMP 580 Final Project (Spring 2017)
+* Controller class to search book using SQLite select query.
+* Book can be searched by ISBN, title, author or category. 
+*
+* @author  Bijay Maharjan, Chi Ho Lee
+* @since   2017-4-26
+*/
 package schoolLibrary.searchBook;
 
 import java.io.IOException;
@@ -20,22 +28,21 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import schoolLibrary.Main;
 import schoolLibrary.bookDetails.BookDetailsController;
-import schoolLibrary.borrowBook.BorrowBookController;
 import javafx.scene.control.Button;
-
 
 public class SearchBookController {
 	
-	private Connection connection;
-	
 	@FXML
-	private TextField query;
+	private TextField searchTxtfield;
 	
 	@FXML
 	private ComboBox<String> categoryComBox;
 	
 	@FXML
 	private TableView<Row> table;
+	
+	@FXML
+	private Button selectBtn;
 
 	// TableColumn maps a row type to a cell type
 	// In this case, we map Row to a String corresponding to the 
@@ -49,8 +56,7 @@ public class SearchBookController {
 	// The list of rows to put into the table
 	private ObservableList<Row> data;
 	
-	private Button selectBtn;
-	
+	private Connection connection;
 	private Main main;
 	
 	/**
@@ -66,9 +72,9 @@ public class SearchBookController {
     	} catch (ClassNotFoundException e1) {
     	}
     	
-        // Initialize the table with the two columns.
+        // Initialize the table with the 3 columns.
     	// Tells JavaFX how to map Row data to columns
-    	// Registering callback function - how to get each cell data (artist name and album name)
+    	// Registering callback function - how to get each cell data
     	// similar to registering event listener
     	isbn.setCellValueFactory(cellData -> cellData.getValue().getIsbn());
     	title.setCellValueFactory(cellData -> cellData.getValue().getTitle());
@@ -78,7 +84,7 @@ public class SearchBookController {
         // Registering event listener
         // obs is query.textProperty()
         // oldText and newText are old and new values of query.getText()
-        query.textProperty().addListener(      (obs, oldText, newText) -> {update();}    );
+        searchTxtfield.textProperty().addListener(      (obs, oldText, newText) -> {update();}    );
         
         // Add event handler when comboBox changed.
         categoryComBox.setOnAction((e) -> {update();} );
@@ -86,29 +92,40 @@ public class SearchBookController {
         // connect to the database
         try {
 			connection = DriverManager.getConnection( "jdbc:sqlite:SchoolLibrarySystem.sqlite");
-		} catch (SQLException e) {
-			handleError(e);
-		}
-        
-        // Read Category Name and put into ComboBox. 
-        categoryComBox.getItems().addAll(
-                "All Categories");
-        String listCatSql = "SELECT CategoryName As catName FROM Category ORDER BY CategoryName;";
-        PreparedStatement stmt = connection.prepareStatement( listCatSql );
-        // get results
-		ResultSet res = stmt.executeQuery();
-
-		while ( res.next() ) {
-			categoryComBox.getItems().addAll(
-					res.getString("catName"));
-		}
 		
-
-		categoryComBox.setValue("All Categories");
+	        // Code below is to Read Category Name and put into ComboBox. 
+	        // Default case search by all category.
+	        categoryComBox.getItems().addAll(
+	                "All Categories");
+	        // SQL to get every category name.
+	        String listCatSql = "SELECT CategoryName As catName FROM Category ORDER BY CategoryName;";
+	        PreparedStatement stmt = connection.prepareStatement( listCatSql );
+	        // get results
+			ResultSet res = stmt.executeQuery();
+			// Add result into the ComboBox.
+			while ( res.next() ) {
+				categoryComBox.getItems().addAll(
+						res.getString("catName"));
+			}
+			// "All Categories" will be selected as default.
+			categoryComBox.setValue("All Categories");
+		
+        } catch (SQLException e) {
+			handleError(e);
+		} finally {
+			if (connection != null) {
+				try {
+		    	// Avoid SQLite_BUSY Error - database is locked
+					connection.close();
+				} catch (SQLException e) {
+					handleError(e);
+				}
+			}
+		} 
 		
         // update initially shows everything, like in iTunes
         update();
-    }
+    }	// end of initialize()
     
     /**
      * this method is called when the user changes the TextField's text
@@ -116,9 +133,13 @@ public class SearchBookController {
 	@FXML
 	private void update() {
 		try {
+			
+			// connect to the database
+			connection = DriverManager.getConnection( "jdbc:sqlite:SchoolLibrarySystem.sqlite");
+			
 			// The parameter comes from the query TextField
 			// at first, it is empty
-			String param = query.getText();
+			String param = searchTxtfield.getText();
 			
 			// data (a list of Rows) is used to fill in the table
 			// at first, raw ArryList() wrapped with FX wrapper (ObservableList<Row>)
@@ -130,13 +151,13 @@ public class SearchBookController {
 			
 			// instead of n/a, just use the empty string
 			if (param.trim().equals("") && categoryComBox.getValue().equals("All Categories")) {
-				// I changed the sql to allow searching by ?
+				// sql to list all books.
 				sql = "SELECT Book.ISBN AS book_isbn, Book.Title AS book_title, Book.Author AS book_author" +
 						" FROM Book" +
 						" ORDER BY book_isbn";
-;
 			}
 			else if (param.trim().equals("")) {
+				// sql to allow searching by ? for category Name
 				sql = "SELECT Book.ISBN AS book_isbn, Book.Title AS book_title, Book.Author AS book_author" +
 						" FROM Book" +
 						" JOIN Category USING (CategoryId)" +
@@ -145,6 +166,7 @@ public class SearchBookController {
 			}
 			else if (categoryComBox.getValue().equals("All Categories"))
 			{
+				// sql to searching book by ? for from all categories.
 				sql = "SELECT Book.ISBN AS book_isbn, Book.Title AS book_title, Book.Author AS book_author" +
 						" FROM Book" +
 						" WHERE Book.ISBN LIKE ? or Book.Title LIKE ? or Book.Author LIKE ?" +
@@ -152,6 +174,7 @@ public class SearchBookController {
 			}
 			else
 			{
+				// sql to searching book by ? and from category by ?.
 				sql = "SELECT Book.ISBN AS book_isbn, Book.Title AS book_title, Book.Author AS book_author" +
 						" FROM Book" +
 						" JOIN Category USING (CategoryId)" +
@@ -165,23 +188,23 @@ public class SearchBookController {
 			// bind parameter(s)
 			// In SQLite "?" is a place holder (act like variable)
 			// 1 is the first place holder, 2 is the second place holder, etc
-			if ( !param.trim().equals("") && categoryComBox.getValue().equals("All Categories")) {
+			if ( !param.trim().equals("")) {
 				// the % before and after the parameter searches anywhere in the database column
+				// For sql to searching book by ? for from all categories.
 				stmt.setString( 1, "%" + param.trim() + "%" );
 				stmt.setString( 2, "%" + param.trim() + "%" );
 				stmt.setString( 3, "%" + param.trim() + "%" );
-			}
-			else if (!param.trim().equals("")) {
-				stmt.setString( 1, "%" + param.trim() + "%" );
-				stmt.setString( 2, "%" + param.trim() + "%" );
-				stmt.setString( 3, "%" + param.trim() + "%" );
-				stmt.setString( 4, "%" + categoryComBox.getValue() + "%" );
+				
+				if (!categoryComBox.getValue().equals("All Categories")) {
+					// For sql to searching book by ? and from category by ?.
+					stmt.setString( 4, "%" + categoryComBox.getValue() + "%" );
+				}
 			}
 			else if (!categoryComBox.getValue().equals("All Categories")) {
+				// For sql to allow searching by ? for category Name
 				stmt.setString( 1, "%" + categoryComBox.getValue() + "%" );
 			}
 				
-
 			// get results
 			ResultSet res = stmt.executeQuery();
 			while ( res.next() ) {
@@ -195,9 +218,17 @@ public class SearchBookController {
 			
 		} catch (SQLException e) {
 			handleError(e);
-		}
-
-	}
+		} finally {
+			if (connection != null) {
+				try {
+		    	// Avoid SQLite_BUSY Error - database is locked
+					connection.close();
+				} catch (SQLException e) {
+					handleError(e);
+				}
+			}
+		} 
+	}	// end of update()
 	
 	private void handleError(Exception e) {
 		// Alert the user when things go terribly wrong
@@ -208,15 +239,18 @@ public class SearchBookController {
 		alert.show();
 	}
 	
+	// Method to handle button click to view book details information.
 	@FXML
 	private void clickSelect() throws IOException {
 		try {
-		Row selectedRow = table.getSelectionModel().getSelectedItem();		
-		BookDetailsController.setIsbn(selectedRow.getIsbn().getValue());
-		main.showBookDetailsScene();
-		}
-		catch (NullPointerException e) {
-			// Alert the user when things go terribly wrong
+			// Get current selected row.
+			Row selectedRow = table.getSelectionModel().getSelectedItem();	
+			// Get ISBN from selected row and passing it to Book Details Controller.
+			BookDetailsController.setIsbn(selectedRow.getIsbn().getValue());
+			// invoke method in main to show scene.
+			main.showBookDetailsScene();
+		} catch (NullPointerException e) {
+			// Alert the user when no row is selected in table.
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.CLOSE);
 			alert.setHeaderText("Please select a book.");
 			// show the alert
