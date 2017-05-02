@@ -25,7 +25,7 @@
          <children>
             <HBox spacing="20.0">
                <children>
-                  <TextField fx:id="query" prefHeight="25.0" prefWidth="411.0" promptText="Enter ISBN, book titile or author" />
+                  <TextField fx:id="searchTxtfield" prefHeight="25.0" prefWidth="411.0" promptText="Enter ISBN, book titile or author" />
                   <ComboBox fx:id="categoryComBox" prefWidth="150.0" />
                </children>
             </HBox>
