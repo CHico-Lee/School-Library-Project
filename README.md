@@ -1,5 +1,5 @@
 # School-Library-Project
-COMP580 DataBase System Final Project
+COMP580 DataBase System Final Project (Spring 2017)
 
 Description: 
 School Library Database System using SQLite, support feature for searching, borrowing, and returning books. 
