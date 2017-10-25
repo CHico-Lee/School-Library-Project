@@ -2,7 +2,6 @@
 COMP580 DataBase System Final Project (Spring 2017)
 
 Description: 
-
 School Library Database System using SQLite, support feature for searching, borrowing, and returning books. 
 This project uses JavaFX to create the user interface. 
 Establish the connection to the SQLite database using JDBC (Java Database Connectivity). 
